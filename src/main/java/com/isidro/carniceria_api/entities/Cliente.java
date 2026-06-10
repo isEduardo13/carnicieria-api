@@ -1,8 +1,11 @@
 package com.isidro.carniceria_api.entities;
 
-import com.isidro.carniceria_api.exceptions.InvalidClienteException;
+import ch.qos.logback.core.util.StringUtil;
+import com.isidro.carniceria_api.utils.StringUtils;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -32,86 +35,48 @@ public class Cliente {
     @Column(name = "notas", length = 100)
     private String notas;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private Timestamp createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Timestamp updatedAt;
 
 
-
-    private void validarNombre(String nombre) {
-        if (nombre == null || nombre.trim().isEmpty()) {
-            throw new InvalidClienteException("El nombre no puede estar vacío");
-        }
-        if (nombre.length() > 150) {
-            throw new InvalidClienteException("El nombre no puede tener más de 150 caracteres");
-        }
+    public void validarNombre(String nombre) {
+        StringUtils.validateSize(nombre, 5 , 150, "El nombre es obligatorio debe tener entre 5 e 150");
     }
-
-    private void validarLongitudes() {
-        if (telefono != null && telefono.length() > 20) {
-            throw new InvalidClienteException("El teléfono no puede tener más de 20 caracteres");
-        }
-        if (direccion != null && direccion.length() > 100) {
-            throw new InvalidClienteException("La dirección no puede tener más de 100 caracteres");
-        }
-        if (notas != null && notas.length() > 100) {
-            throw new InvalidClienteException("Las notas no pueden tener más de 100 caracteres");
-        }
-    }
-
 
     public void actualizarNombre(String nuevoNombre) {
-        validarNombre(nuevoNombre);
         this.nombre = nuevoNombre.trim();
-        touchUpdatedAt();
     }
 
     public void actualizarTelefono(String nuevoTelefono) {
         if (nuevoTelefono != null && nuevoTelefono.length() > 20) {
-            throw new InvalidClienteException("El teléfono no puede tener más de 20 caracteres");
+            throw new IllegalArgumentException("El teléfono no puede tener más de 20 caracteres");
         }
         this.telefono = (nuevoTelefono == null) ? null : nuevoTelefono.trim();
-        touchUpdatedAt();
     }
 
     public void actualizarDireccion(String nuevaDireccion) {
         if (nuevaDireccion != null && nuevaDireccion.length() > 100) {
-            throw new InvalidClienteException("La dirección no puede tener más de 100 caracteres");
+            throw new IllegalArgumentException("La dirección no puede tener más de 100 caracteres");
         }
         this.direccion = (nuevaDireccion == null) ? null : nuevaDireccion.trim();
-        touchUpdatedAt();
+
     }
 
     public void actualizarNotas(String nuevasNotas) {
         if (nuevasNotas != null && nuevasNotas.length() > 100) {
-            throw new InvalidClienteException("Las notas no pueden tener más de 100 caracteres");
+            throw new IllegalArgumentException("Las notas no pueden tener más de 100 caracteres");
         }
         this.notas = (nuevasNotas == null) ? null : nuevasNotas.trim();
-        touchUpdatedAt();
+
     }
 
-    private void touchUpdatedAt() {
-        this.updatedAt = Timestamp.from(Instant.now());
-    }
 
-    @PrePersist
-    private void prePersist() {
-        Instant now = Instant.now();
-        Timestamp ts = Timestamp.from(now);
-        if (this.createdAt == null) this.createdAt = ts;
-        this.updatedAt = ts;
-        validarNombre(this.nombre);
-        validarLongitudes();
-    }
 
-    @PreUpdate
-    private void preUpdate() {
-        this.updatedAt = Timestamp.from(Instant.now());
 
-        validarNombre(this.nombre);
-        validarLongitudes();
-    }
 
 }
