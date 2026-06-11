@@ -1,6 +1,5 @@
 package com.isidro.carniceria_api.entities;
 
-import ch.qos.logback.core.util.StringUtil;
 import com.isidro.carniceria_api.utils.StringUtils;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -21,7 +21,7 @@ public class Cliente {
     @Id
     @Column(name = "id_cliente")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(name = "nombre", nullable = false, length = 150)
     private String nombre;
@@ -37,11 +37,11 @@ public class Cliente {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
-    private Timestamp updatedAt;
+    private LocalDateTime updatedAt;
 
 
     public void validarNombre(String nombre) {
@@ -49,7 +49,8 @@ public class Cliente {
     }
 
     public void actualizarNombre(String nuevoNombre) {
-        this.nombre = nuevoNombre.trim();
+        validarNombre(nuevoNombre);
+        this.nombre = nuevoNombre;
     }
 
     public void actualizarTelefono(String nuevoTelefono) {
@@ -75,8 +76,11 @@ public class Cliente {
 
     }
 
-
-
-
+    public void actualizarDatos(String nombre, String  telefono, String direccion, String notas) {
+        actualizarNombre(nombre);
+        actualizarTelefono(telefono);
+        actualizarDireccion(direccion);
+        actualizarNotas(notas);
+    }
 
 }
